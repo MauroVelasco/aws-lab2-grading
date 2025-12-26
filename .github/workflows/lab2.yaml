@@ -24,4 +24,5 @@ jobs:
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset
       - name: Run test_lab2
-        run: pytest test_lab2.py            
+        run: pytest test_lab2.py
+            
