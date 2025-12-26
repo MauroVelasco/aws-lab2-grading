@@ -188,7 +188,7 @@ Resources:
 # --- OUTPUTS SECTION ---
 
 Outputs:
-  LoadBalancerName:
+  LoadBalancerDNSName:
     Description: The Name of the Load Balancer
     Value: !GetAtt ApplicationLoadBalancer.LoadBalancerName
 
