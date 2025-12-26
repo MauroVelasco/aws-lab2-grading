@@ -138,5 +138,5 @@ Resources:
 
 
 Outputs:
-  VpcId:
+  LoadBalancerDNSName:
     Value: !Ref VPC

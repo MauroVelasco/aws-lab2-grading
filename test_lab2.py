@@ -73,7 +73,7 @@ def aws_region() -> str:
     region = session.region_name
     if not region:
         # Many lab environments default to us-east-1; set it explicitly if needed.
-        region = "us-east-1"
+        region = "us-east-2"
     return region
 
 
