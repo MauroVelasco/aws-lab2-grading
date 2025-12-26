@@ -89,6 +89,7 @@ def elbv2(aws_region):
 
 def test_stack_exists_and_has_alb_output(cfn):
     dns = _get_stack_output(cfn, STACK_NAME, "LoadBalancerDNSName")
+    print(f"DEBUG: dns={dns}")
     assert dns and "." in dns, f"Unexpected ALB DNS output: {dns}"
 
 
