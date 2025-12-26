@@ -190,4 +190,4 @@ Resources:
 Outputs:
   LoadBalancerDNSName:
     Description: The Name of the Load Balancer
-    Value: !GetAtt ApplicationLoadBalancer.LoadBalancerName
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
