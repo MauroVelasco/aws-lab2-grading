@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: EC2 and networking
+Description: EC2 Infrastructure with Application Load Balancer entry point
 
 Resources:
   VPC:
@@ -57,20 +57,66 @@ Resources:
       SubnetId: !Ref SubnetB
       RouteTableId: !Ref PublicRouteTable
 
-  SecurityGroup:
+  # --- LOAD BALANCER SECTION ---
+
+  ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow HTTP inbound and SSH
+      GroupDescription: Allow Public HTTP to ALB
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  ApplicationLoadBalancer:
+    Type: AWS::ELBv2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      Subnets:
+        - !Ref SubnetA
+        - !Ref SubnetB
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+
+  ALBTargetGroup:
+    Type: AWS::ELBv2::TargetGroup
+    Properties:
+      VpcId: !Ref VPC
+      Protocol: HTTP
+      Port: 80
+      TargetType: instance
+      HealthCheckPath: /
+      Matcher:
+        HttpCode: '200'
+
+  ALBListener:
+    Type: AWS::ELBv2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Protocol: HTTP
+      Port: 80
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+
+  # --- UPDATED INSTANCE SECURITY GROUP ---
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP ONLY from ALB
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 0.0.0.0/0
+          CidrIp: 0.0.0.0/0 # Still allow SSH for debugging
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0
+          SourceSecurityGroupId: !Ref ALBSecurityGroup # Restricted to ALB only
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -102,7 +148,7 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
         SecurityGroupIds:
-          - !Ref SecurityGroup
+          - !Ref InstanceSecurityGroup
         MetadataOptions:
           HttpTokens: required
         UserData:
@@ -125,6 +171,9 @@ Resources:
       LaunchTemplate:
         LaunchTemplateId: !Ref LaunchTemplate
         Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      # ADDED: Connects ASG to the ALB Target Group
+      TargetGroupARNs:
+        - !Ref ALBTargetGroup
   
   CpuScalingPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
@@ -136,7 +185,13 @@ Resources:
           PredefinedMetricType: ASGAverageCPUUtilization
         TargetValue: 50
 
+# --- OUTPUTS SECTION ---
 
 Outputs:
-  LoadBalancerDNSName:
-    Value: !Ref VPC
+  LoadBalancerName:
+    Description: The Name of the Load Balancer
+    Value: !GetAtt ApplicationLoadBalancer.LoadBalancerName
+
+  LoadBalancerDNS:
+    Description: The URL to access the application
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
