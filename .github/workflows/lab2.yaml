@@ -1,7 +1,14 @@
 name: Lab2
 on:
-  push:
-    branches: [ "main" ]
+  #push:
+  #  branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+      tags:
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,4 +32,3 @@ jobs:
             --no-fail-on-empty-changeset
       - name: Run test_lab2
         run: pytest test_lab2.py
-            
