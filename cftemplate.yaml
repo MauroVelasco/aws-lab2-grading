@@ -71,7 +71,7 @@ Resources:
           CidrIp: 0.0.0.0/0
 
   ApplicationLoadBalancer:
-    Type: AWS::ELBv2::LoadBalancer
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Scheme: internet-facing
       Subnets:
@@ -81,7 +81,7 @@ Resources:
         - !Ref ALBSecurityGroup
 
   ALBTargetGroup:
-    Type: AWS::ELBv2::TargetGroup
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       VpcId: !Ref VPC
       Protocol: HTTP
@@ -92,7 +92,7 @@ Resources:
         HttpCode: '200'
 
   ALBListener:
-    Type: AWS::ELBv2::Listener
+    Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       LoadBalancerArn: !Ref ApplicationLoadBalancer
       Protocol: HTTP
