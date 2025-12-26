@@ -191,7 +191,3 @@ Outputs:
   LoadBalancerDNSName:
     Description: The Name of the Load Balancer
     Value: !GetAtt ApplicationLoadBalancer.LoadBalancerName
-
-  LoadBalancerDNS:
-    Description: The URL to access the application
-    Value: !GetAtt ApplicationLoadBalancer.DNSName
